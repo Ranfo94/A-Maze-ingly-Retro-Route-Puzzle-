@@ -11,6 +11,7 @@ def solveProblem(jsonMapPath, startingRoomID, toBeCollectedList):
     # iterate over graph to find the path for each object
     result = findPath(parsedRooms, startingRoomID, toBeCollectedList)
     # return result
+    print(result)
 
 
 if __name__ == "__main__":
