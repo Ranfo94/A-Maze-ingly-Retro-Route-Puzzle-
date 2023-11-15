@@ -1,4 +1,4 @@
-def getAdjacentRooms(room):
+def get_adjacent_rooms(room):
     '''
     Returns the list of rooms adjacent to the given room
 
@@ -8,110 +8,104 @@ def getAdjacentRooms(room):
     '''
     result = []
     if hasattr(room.coordinates, "north"):
-        result.append(roomsDictionary[room.coordinates.north])
+        result.append(rooms_dictionary[room.coordinates.north])
     if hasattr(room.coordinates, "south"):
-        result.append(roomsDictionary[room.coordinates.south])
+        result.append(rooms_dictionary[room.coordinates.south])
     if hasattr(room.coordinates, "east"):
-        result.append(roomsDictionary[room.coordinates.east])
+        result.append(rooms_dictionary[room.coordinates.east])
     if hasattr(room.coordinates, "west"):
-        result.append(roomsDictionary[room.coordinates.west])
+        result.append(rooms_dictionary[room.coordinates.west])
     return result
 
 
-def checkLeftItems():
+def check_left_items():
     '''
     Check if there are left items to be collected from rooms
 
     @returns True if all items are collected, False otherwise
     '''
-    return len(objectsToCollect) == 0
+    return len(objects_to_collect) == 0
 
 
-def searchObjects(objsInRoom):
+def search_objects(objects_in_room):
     '''
     Search for objects to be collected. If the objects in the room match with the objects to be collected, 
     than the objects are collected and removed from the list of objects to collect.
 
-    @param objsInRoom The list of objects in the current room
+    @param objects_in_room The list of objects in the current room
 
     @returns The objects in the room that must be collected
     '''
     result = []
-    for obj in objsInRoom:
-        if obj in objectsToCollect:
+    for obj in objects_in_room:
+        if obj in objects_to_collect:
             # add found item in resulting list
             result.append(obj)
             # remove the object from the list of objects to be found
-            objectsToCollect.remove(obj)
+            objects_to_collect.remove(obj)
     return result
 
 
-def visitRoom(room, prevRoomId, prevRoomName=""):
+def visit_room(room, prev_room_id, prev_room_name=""):
     '''
     Visits in a recursive manner all rooms connected with the current one
     If no connected rooms are left to visit go back to the previous one adding that to the output path
 
     @param room The current room
-    @prevRoomId Identifier of the previous room
-    @prevRoomName Name of the previous room
+    @param prev_room_id Identifier of the previous room
+    @param prev_room_name Name of the previous room
     '''
 
-    print("visitRoom("+str(room.id) + "," + str(prevRoomId)+")")
-    print("objs to find: " + str(objectsToCollect))
     # TODO this check should be useless check whether to delete or not
-    if checkLeftItems():
+    if check_left_items():
         # if all items are found there is no reason to continue with loop
         return
-    roomId = room.id
-    roomName = room.name
+    room_id = room.id
+    room_name = room.name
     # TODO maybe too defensive --> this check should be useless
-    if not roomId in visitedRooms:
+    if not room_id in visited_rooms:
         # add room to visited
-        visitedRooms.append(roomId)
-        print("visited: " + str(visitedRooms))
+        visited_rooms.append(room_id)
         # process room objects
-        objsFound = searchObjects(room.objects)
+        objects_found = search_objects(room.objects)
         # update output path with objects found in this room
-        resultPath.append((roomId, objsFound, room.name))
-        if checkLeftItems():
+        result_path.append((room_id, objects_found, room.name))
+        if check_left_items():
             # if all items are found there is no reason to go deeper in path
             return
         # now get all adjacent rooms
-        adjRooms = getAdjacentRooms(room)
-        for adjRoom in adjRooms:
-            if not adjRoom.id in visitedRooms:
-                visitRoom(adjRoom, roomId, roomName)
-                if checkLeftItems():
+        adj_rooms = get_adjacent_rooms(room)
+        for adj_room in adj_rooms:
+            if not adj_room.id in visited_rooms:
+                visit_room(adj_room, room_id, room_name)
+                if check_left_items():
                     return
         # if no rooms are left to visit go back to previous room
-        if not prevRoomId == 0:
-            resultPath.append((prevRoomId, [], prevRoomName))
+        if not prev_room_id == 0:
+            result_path.append((prev_room_id, [], prev_room_name))
 
 
-def findPath(parsedMap, startingRoomID, toBeCollectedList):
+def find_path(rooms_dict, starting_room_id, to_be_collected_list):
     '''
     Computes a valid path to find all the items to be collected from a dictionary of rooms starting from the given room ID.
 
-    @param parsedMap Dictionary of rooms, the Key is the ID of the room
-    @param startingRoomID ID of the room where to start the search
-    @param toBeCollectedList list of items to be collected
+    @param rooms_dict Dictionary of rooms, the Key is the ID of the room
+    @param starting_room_id ID of the room where to start the search
+    @param to_be_collected_list list of items to be collected
 
     @returns List of tuple that represents a valid path to collect all items
     '''
 
-    global roomsDictionary
-    roomsDictionary = parsedMap
+    global rooms_dictionary, visited_rooms, objects_to_collect, result_path
+    rooms_dictionary = rooms_dict
     # first room has no previous room
-    prevRoom = 0
+    prev_room_id = 0
     # init list of already visited rooms to avoid double visits
-    global visitedRooms
-    visitedRooms = []
+    visited_rooms = []
     # init list of items that still needs to be collected
-    global objectsToCollect
-    objectsToCollect = toBeCollectedList
+    objects_to_collect = to_be_collected_list
     # init a list of tuple that represents the output path
-    global resultPath
-    resultPath = []
+    result_path = []
     # start visiting first room
-    visitRoom(parsedMap[int(startingRoomID)], 0)
-    return resultPath
+    visit_room(rooms_dict[int(starting_room_id)], prev_room_id)
+    return result_path
