@@ -1,17 +1,13 @@
 import sys
-from parsers.MapParser import build_rooms_dictionary, read_json_string
-from finder.PathFinder import find_path
+import argparse
+
+from solver.Solver import Solver
+import exceptions.MazeExceptions as exceptions
 
 
-def solve_problem(maze_file_path, starting_room_id, to_be_collected_list):
-    # read json string from json file path
-    json_string = read_json_string(maze_file_path)
-    # parse and validate json file
-    parsed_rooms = build_rooms_dictionary(json_string)
-    # iterate over graph to find the path for each object
-    result = find_path(parsed_rooms, starting_room_id, to_be_collected_list)
-    # return result
-    return result
+def handle_exception(error_string):
+    print(error_string)
+    exit(1)
 
 
 def print_solution(problem_solution):
@@ -32,16 +28,34 @@ def print_solution(problem_solution):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
-        # function can only be launched with 3 params
-        print("Error using script. At least 3 params must be specified")
-        # TODO finish this
-        exit(1)
-    maze_file_path = sys.argv[1]
-    starting_room_id = sys.argv[2]
-    # from third argument put all
-    to_be_collected_list = sys.argv[3:]
+    try:
+        parser = argparse.ArgumentParser(prog="Maze Puzzle",
+                                         description='This program solves the Maze Puzzle')
 
-    result = solve_problem(
-        maze_file_path, starting_room_id, to_be_collected_list)
-    print_solution(result)
+        parser.add_argument('path', type=str,
+                            help='JSON file containing the rooms definition')
+        parser.add_argument('id', type=int,
+                            help='Identifier of the starting room')
+        parser.add_argument('objects', nargs='+', type=str,
+                            help='Space separated list of objects to be collected from the rooms')
+
+        args = parser.parse_args()
+
+        rooms_json_file_path = args.path
+        starting_room_id = args.id
+        to_be_collected_list = args.objects
+
+        solver = Solver(rooms_json_file_path,
+                        starting_room_id, to_be_collected_list)
+
+        result = solver.solve_problem()
+        print_solution(result)
+    except exceptions.SolverInitException as e:
+        handle_exception(str(e))
+    except exceptions.FinderException as e:
+        handle_exception(str(e))
+    except exceptions.ParserException as e:
+        handle_exception(str(e))
+    except Exception as e:
+        handle_exception(
+            "A generic error occurred while solving the problem. Please contact the developers")
