@@ -1,92 +1,138 @@
-# A-Maze-ingly-Retro-Route-Puzzle-
+# A Maze-ingly Retro Route Puzzle
 
-Docs
+## Summary
 
-summary
-
-1. Software Description
-2. Software Architecture and Components
-	2.1 Entities
-	2.2 Mapper
-	2.3 Solver
+1. Problem Description
+	1. Example
+2. Software Description
 3. Installation
 4. Tests
 5. Usage
 
 
-1. Software Description
+## Problem Description
+
+This program outputs a valid route (not the shortest) to collect a set of items within a maze. The maze is a json description of set of rooms. Each room can have one or more objects to be collected and describes all the adjacent rooms.
+
+Program input:
+
+- A path to a valid JSON file containing the maze structures
+- The identifier of the starting room
+- The list of the objects to be collected
+
+Program output:
+
+- A valid route to collect all the given items
+
+
+### Example
+
+#### sample_maze.json
+
+```json 
+{
+  "rooms": [
+    {
+      "id": 1,
+      "name": "Hallway",
+      "north": 2,
+      "objects": []
+    },
+    {
+      "id": 2,
+      "name": "Dining Room",
+      "south": 1,
+      "west": 3,
+      "east": 4,
+      "objects": []
+    },
+    {
+      "id": 3,
+      "name": "Kitchen",
+      "east": 2,
+      "objects": [
+        {
+          "name": "Knife"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Sun Room",
+      "west": 2,
+      "objects": [
+        {
+          "name": "Potted Plant"
+        }
+      ]
+    }
+  ]
+} 
+```
+
+#### Input
+
+- Map = maze.json
+- Starting room = 1
+- Objects to collect = Knife
+
+#### Output
+
+| Room Name | Objects Collected |
+| :--- | :---: |
+|   Hallway   | None |
+|   Dining Room   | None |
+|  Sun Room   | None |
+|  Dining Room   | None |
+|  Kitchen   | Knife |
+
+## Software Description
 
 The Maze Solver application solves the problem to find a path to collect a certain amount of objects from a series of rooms starting from a specific room ID. 
 The solution has been developed using the Python programming language.
 
-2. Software Architecture and Components
+## Software Architecture and Components
 
-For the given problem it was chosen a simple architecture based on 3 modules:
-	- an Entity module that contains the classes needed to incapsulate rooms and coordinates objects;
-	- a Mapper module that contains all the functions needed to obtain a dictionary of room objects starting from the path to a valid JSON file;
-	- a Solver module that contains the functions to solve that actual maze problem starting from the problem's inputs.
+For the given problem it was chosen a simple architecture based on 4 modules:
+- an Entity module that contains the classes needed to incapsulate rooms and coordinates objects;
+- a Mapper module that contains all the functions needed to obtain a dictionary of room objects starting from the path to a valid JSON file;
+- a Finder module that contains the functions needed to solve that actual maze problem starting from the problem's input
+- a Solver module that encapsulates all arguments and exposes the functions developed by the Solver
 
-2.1 Entities
+## Installation
 
-There are two entities that have been identified to correctly model the application:
-	- Room
-	- Coordinates
+To setup the environment to run the application just install all the packages contained in the requirements.txt file with pip like the following
 
-A Room object contains the following informations
-	- Id: an integer that represents the room identifier;
-	- Name: a string that reprepresents the room name;
-	- Coordinates: a coordinates object that contains the identifiers of all the rooms adjacent with the current one;
-	- Objects: a list of string that represent the list of the object that can be collected inside the room.
+```bash
+pip install -r requirements.txt 
+```
 
-A Coordinates object the following information
-	- North: the identifier of the room north of the current room;
-	- South: the identifier of the room south of the current room;
-	- East: the identifier of the room east of the current room;
-	- West: the identifier of the room west of the current room.
+## Tests
 
-2.2 Mapper
+To execute the test procedure just run the following
 
-The mapper module is responsible for creating a list of Room objects staring from the path to the input JSON file. It helps to isolate all functions that operates on the json object in a single module and helps the overall readability of the code
+```bash
+pytest
+```
 
-When a JSON file is processed some checks are made to prevent the solver module to use a non-compliant JSON file. The application raises an error if:
-	- the json path specified as input is a non-existing file;
-	- the json file is empty;
-	- the json file is a non-valid JSON.
+## Usage
 
-The hearth of this module is the parseJsonMap function that returns a dictionary where the key is represented by the room's identifier and the value is the room object associated with the key. This choise has been made to simplify the search for a room. In fact the search for a specific room's id has a complexity of O(1) against the complexity of O(n) of seaching all items untill the desired one is found.
+To use the application just run the app.py script that will run the application with 3 parameters
 
-2.3 Solver
+- path: the relative or absolute path to the json file containing the rooms data
+- id: an integer representing the identifier of the first room to be visited
+- objects: a list of objects incapsulated in double quotes and space separated "Obj 1" "Obj 2" ... "Obj N"
 
-The solver module is the hearth of the application as it contains the functions needed to find the path to collect all the items that the application is searching for. 
+An example of usage 
 
-The findPath function is the access point to the module. This function sets the initial values for the recursion and calls the recursive function visitRoom with inputs the room to be visited and the identifier of the previus room. The identifier the of the previous room is needed to let the function know where the path is going if no rooms can be visited and not all items have been found.
+```bash
+python3 app.py src/smallMaze.json 1 Knife
+```
 
-This function add a new entry to the path if the room has not been visited yet and then checks if there are adjacent rooms that needs to be visited. If all adjacent rooms have been visited already and there are still items to be collected the functions knows that path is getting back to the previous room and writes an entry to the path with the previous room and empty objects.
+To learn more about the usage just run
 
-The function raises and error if the recursion is over and there are still items to be found.
-
-3. Installation
-
-To setup the environment to run the application just run the "install.sh" script that will:
-	- install pip with the following command 
-
-	- install the pytest to run the tests 
-		pip install -U pytest
-
-4. Tests
-
-To run the test just run the "test.sh"" script that will use pystest to run all the unit tests written for the application
-
-5. Usage
-
-To use the application just run the run.sh script that will run the application with 3 parameters
-
-	- path_to_json_file: the relative or absolute path to the json file containing the rooms data
-	- staring_room_id: an integer representing the identifier of the first room to be visited
-	- objects_list: a list of objects incapsulated in double quotes and space separated "Obj 1" "Obj 2" ... "Obj N"
-
-the run.sh script will invoke the python application with the following code
-
-	python3 app.py path_to_json_file staring_room_id objects_list
+```bash
+python app.py -h
+```
 
 If the run is successfull the application will print on stdout the path to collect all items starting from the starting_room_id, otherwise it will print on stderr any possible error
