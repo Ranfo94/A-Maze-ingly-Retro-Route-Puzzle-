@@ -43,7 +43,11 @@ if __name__ == "__main__":
 
         rooms_json_file_path = args.path
         starting_room_id = args.id
-        to_be_collected_list = args.objects
+        input_object_list = args.objects
+
+        to_be_collected_list = []
+        for obj in input_object_list:
+            to_be_collected_list.append(obj.strip())
 
         solver = Solver(rooms_json_file_path,
                         starting_room_id, to_be_collected_list)

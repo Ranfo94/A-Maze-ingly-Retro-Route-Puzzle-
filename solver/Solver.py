@@ -9,6 +9,8 @@ class Solver:
     to find the desired path using the given arguments
     '''
 
+    __invalid_characters = [""]
+
     def __init__(self, rooms_json_file_path="", starting_room_id=0, objects_to_be_collected=[]):
         '''
         Init function for the Solver class
@@ -30,6 +32,10 @@ class Solver:
         if len(self.objects_to_be_collected) == 0:
             raise SolverInitException(
                 "The list of objects to be collected is empty. Please check arguments")
+        for obj in self.objects_to_be_collected:
+            if obj in self.__invalid_characters:
+                raise SolverInitException(
+                    "An invalid object was encountered in the given object list. Please check arguments")
 
     def solve_problem(self):
         '''

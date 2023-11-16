@@ -122,6 +122,10 @@ def find_path(rooms_dict, starting_room_id, to_be_collected_list):
         result_path = []
         # start visiting first room
         visit_room(rooms_dict[int(starting_room_id)], prev_room_id)
+
+        if len(objects_to_collect) != 0:
+            raise FinderException(
+                "There is no valid path to collect all objects. Please check arguments")
         return result_path
     except FinderException:
         raise

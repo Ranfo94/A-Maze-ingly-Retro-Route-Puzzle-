@@ -1,0 +1,20 @@
+{
+  "rooms": [
+    {
+      "id": 1,
+      "name": "Test Room 1",
+      "north": 2,
+      "objects": []
+    },
+    {
+      "id": 2,
+      "name": "Test Room 2",
+      "south": 1,
+      "objects": [
+        {
+          "name":"test_object"
+        }
+      ]
+    }
+  ]
+}
